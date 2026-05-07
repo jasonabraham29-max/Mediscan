@@ -1183,6 +1183,20 @@ export default function MediScan() {
 
         </div>
       </div>
-    </>
+
+ {/* Footer */}
+<footer style={{
+  borderTop: "1px solid rgba(255,255,255,0.06)",
+  padding: "24px",
+  textAlign: "center",
+  marginTop: "40px"
+}}>
+  <div style={{ display: "flex", justifyContent: "center", gap: "24px", flexWrap: "wrap", marginBottom: "12px" }}>
+    <a href="/confidentialite" style={{ color: "#64748b", fontSize: 13, textDecoration: "none" }}>Confidentialité</a>
+    <a href="/cgu" style={{ color: "#64748b", fontSize: 13, textDecoration: "none" }}>CGU</a>
+    <a href="/mentions-legales" style={{ color: "#64748b", fontSize: 13, textDecoration: "none" }}>Mentions légales</a>
+  </div>
+  <p style={{ color: "#475569", fontSize: 11, margin: 0 }}>© 2025 MediScan — Outil d'information médicale uniquement</p>
+</footer>   </>
   );
 }
