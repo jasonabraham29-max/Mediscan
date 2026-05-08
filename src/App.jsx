@@ -902,6 +902,8 @@ export default function MediScan() {
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [age, setAge] = useState("");
   const [result, setResult] = useState(null);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+    
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -1181,7 +1183,41 @@ export default function MediScan() {
             </div>
           )}
 
-        </div>
+                                                                                                              {/* Disclaimer Modal */}
+{!disclaimerAccepted && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+    background: "rgba(0,0,0,0.85)", zIndex: 1000,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "24px"
+  }}>
+    <div style={{
+      background: "#0d1b2a", border: "1px solid rgba(99,102,241,0.3)",
+      borderRadius: 20, padding: "32px 24px", maxWidth: 480, width: "100%"
+    }}>
+      <div style={{ fontSize: 40, textAlign: "center", marginBottom: 16 }}>⚕️</div>
+      <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 700, textAlign: "center", marginBottom: 12 }}>
+        Avant de commencer
+      </h2>
+      <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+        MediScan est un <strong style={{color:"#a5b4fc"}}>outil d'information uniquement</strong>. Il ne fournit pas de diagnostic médical et ne remplace pas un médecin.
+      </p>
+      <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+        🚨 <strong style={{color:"#fca5a5"}}>En cas d'urgence, appelez le 15 (SAMU) ou le 112.</strong>
+      </p>
+      <button
+        onClick={() => setDisclaimerAccepted(true)}
+        style={{
+          width: "100%", padding: "14px", borderRadius: 12, border: "none",
+          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+          color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer"
+        }}
+      >
+        J'ai compris, continuer
+      </button>
+    </div>
+  </div>
+)}          </div>
       </div>
 
  {/* Footer */}
