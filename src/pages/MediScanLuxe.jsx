@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const SYMPTOMS = [
   "Fièvre", "Maux de tête", "Toux sèche", "Essoufflement",
@@ -7,7 +7,7 @@ const SYMPTOMS = [
   "Frissons", "Perte d'appétit", "Troubles du sommeil"
 ];
 
-export default function App() {
+export default function MediScanLuxe() {
   const [step, setStep] = useState(0);
   const [description, setDescription] = useState("");
   const [selected, setSelected] = useState([]);
@@ -26,6 +26,7 @@ export default function App() {
       selected.length > 0 && `Symptômes : ${selected.join(", ")}`,
       age && `Âge : ${age} ans`,
     ].filter(Boolean).join("\n");
+
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -38,12 +39,12 @@ export default function App() {
         body: JSON.stringify({
           model: "claude-opus-4-5",
           max_tokens: 1000,
-          messages: [{ role: "user", content: `Tu es un assistant médical informatif. Réponds UNIQUEMENT en JSON valide sans markdown ni backticks.\n\n${symptomsText}\n\nFormat exact:\n{"diagnostic":"...","medicaments":["...","..."],"actions":["...","..."]}` }],
+          messages: [{ role: "user", content: `Tu es un assistant médical informatif. Réponds UNIQUEMENT en JSON valide sans markdown.\n\n${symptomsText}\n\nFormat:\n{"diagnostic":"...","medicaments":["...","..."],"actions":["...","..."]}` }],
         }),
       });
       const data = await response.json();
       const text = data.content?.[0]?.text || "";
-      const parsed = JSON.parse(text.trim());
+      const parsed = JSON.parse(text.replace(/\`\`\`json|\`\`\`/g, "").trim());
       setResult(parsed);
       setStep(3);
     } catch (err) {
@@ -87,6 +88,7 @@ export default function App() {
         .sline.done { background:var(--navy); }
       `}</style>
 
+      {/* DISCLAIMER */}
       {step === 0 && (
         <div style={{position:"fixed",inset:0,zIndex:100,background:"rgba(8,16,30,0.8)",backdropFilter:"blur(16px)",display:"flex",alignItems:"center",justifyContent:"center",padding:24,animation:"fadeIn 0.4s ease"}}>
           <div style={{background:"white",borderRadius:24,maxWidth:440,width:"100%",overflow:"hidden",boxShadow:"0 40px 80px rgba(10,22,40,0.3)"}}>
@@ -111,6 +113,7 @@ export default function App() {
         </div>
       )}
 
+      {/* HEADER */}
       <header style={{position:"sticky",top:0,zIndex:50,background:"rgba(248,251,255,0.92)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(91,168,229,0.15)"}}>
         <div style={{maxWidth:1100,margin:"0 auto",padding:"0 28px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -128,6 +131,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* STEP 1 */}
       {step === 1 && (
         <main style={{maxWidth:720,margin:"0 auto",padding:"56px 28px 72px"}}>
           <div style={{marginBottom:48}}>
@@ -141,7 +145,9 @@ export default function App() {
               Décrivez ce que vous ressentez. Notre IA analyse vos symptômes et vous guide.
             </p>
           </div>
+
           <hr className="gold-line rise d3" style={{marginBottom:40}}/>
+
           <div className="rise d4" style={{display:"flex",alignItems:"center",gap:0,marginBottom:28,maxWidth:280}}>
             <div className="snode active">1</div>
             <div className="sline"/>
@@ -150,11 +156,14 @@ export default function App() {
             <div className="snode idle">3</div>
             <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#93A5B8",marginLeft:14}}>Étape 1 sur 3</span>
           </div>
+
           <div className="rise d5 card">
             <label style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:600,color:"#93A5B8",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:10}}>Décrivez vos symptômes</label>
             <textarea className="field" rows={4} placeholder="Ex : Depuis hier, j'ai mal à la gorge et une légère fièvre..." value={description} onChange={e => setDescription(e.target.value)}/>
             <div style={{display:"flex",alignItems:"center",gap:12,margin:"20px 0",fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#B8C5D3"}}>
-              <div style={{flex:1,height:1,background:"rgba(91,168,229,0.15)"}}/>Ou sélectionnez ci-dessous<div style={{flex:1,height:1,background:"rgba(91,168,229,0.15)"}}/>
+              <div style={{flex:1,height:1,background:"rgba(91,168,229,0.15)"}}/>
+              Ou sélectionnez ci-dessous
+              <div style={{flex:1,height:1,background:"rgba(91,168,229,0.15)"}}/>
             </div>
             <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:28}}>
               {SYMPTOMS.map(s => (
@@ -165,12 +174,14 @@ export default function App() {
               ))}
             </div>
             <button className="cta" style={{width:"100%",justifyContent:"center"}} onClick={() => setStep(2)} disabled={!description.trim() && selected.length === 0}>
-              Continuer <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              Continuer
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
           </div>
         </main>
       )}
 
+      {/* STEP 2 */}
       {step === 2 && (
         <main style={{maxWidth:720,margin:"0 auto",padding:"56px 28px 72px"}}>
           <div style={{display:"flex",alignItems:"center",gap:0,marginBottom:36,maxWidth:280}}>
@@ -203,7 +214,8 @@ export default function App() {
           {error && <div style={{background:"#FFF5F5",border:"1px solid rgba(220,53,69,0.2)",borderRadius:12,padding:"12px 16px",fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#C0392B",marginBottom:14}}>{error}</div>}
           <div style={{display:"flex",gap:10}}>
             <button className="ghost" onClick={() => setStep(1)}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Retour
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Retour
             </button>
             <button className="cta" style={{flex:1,justifyContent:"center"}} onClick={handleAnalyze} disabled={analyzing}>
               {analyzing ? "Analyse en cours..." : "Lancer l'analyse"}
@@ -225,6 +237,7 @@ export default function App() {
         </main>
       )}
 
+      {/* STEP 3 */}
       {step === 3 && result && (
         <main style={{maxWidth:720,margin:"0 auto",padding:"56px 28px 72px",animation:"fadeIn 0.6s ease"}}>
           <div style={{background:"linear-gradient(135deg,#0A1628,#1B3A6B)",borderRadius:20,padding:"32px 36px",marginBottom:20,position:"relative",overflow:"hidden"}}>
@@ -236,37 +249,55 @@ export default function App() {
             <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:30,fontWeight:400,color:"white",marginBottom:6}}>Résultats de votre analyse</h2>
             <p style={{fontFamily:"'DM Sans',sans-serif",color:"rgba(255,255,255,0.4)",fontSize:13}}>{age ? `Patient de ${age} ans` : "Analyse personnalisée"}</p>
           </div>
+
+          {/* Diagnostic */}
           <div style={{background:"#EBF4FF",border:"1px solid rgba(27,111,191,0.15)",borderRadius:16,padding:"22px 24px",marginBottom:14}}>
             <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:700,color:"#1B6FBF",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10}}>Diagnostic probable</div>
             <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:15,color:"#0A1628",lineHeight:1.7}}>{result.diagnostic}</p>
           </div>
+
+          {/* Médicaments */}
           <div style={{background:"#FDFAF2",border:"1px solid rgba(201,168,76,0.2)",borderRadius:16,padding:"22px 24px",marginBottom:14}}>
             <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:700,color:"#C9A84C",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10}}>Médicaments suggérés</div>
             <ul style={{listStyle:"none",padding:0}}>
-              {result.medicaments.map((m,i) => <li key={i} style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#3D4F63",lineHeight:1.7,padding:"4px 0",display:"flex",gap:10}}><span style={{color:"#C9A84C",fontWeight:600}}>—</span>{m}</li>)}
+              {result.medicaments.map((m, i) => (
+                <li key={i} style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#3D4F63",lineHeight:1.7,padding:"4px 0",display:"flex",gap:10}}>
+                  <span style={{color:"#C9A84C",fontWeight:600,flexShrink:0}}>—</span>{m}
+                </li>
+              ))}
             </ul>
           </div>
+
+          {/* Actions */}
           <div style={{background:"#F0FAF4",border:"1px solid rgba(39,174,96,0.15)",borderRadius:16,padding:"22px 24px",marginBottom:24}}>
             <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:700,color:"#27AE60",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10}}>Actions recommandées</div>
             <ul style={{listStyle:"none",padding:0}}>
-              {result.actions.map((a,i) => <li key={i} style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#2D5A3D",lineHeight:1.7,padding:"4px 0",display:"flex",gap:10}}><span style={{color:"#27AE60",fontWeight:600}}>—</span>{a}</li>)}
+              {result.actions.map((a, i) => (
+                <li key={i} style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#2D5A3D",lineHeight:1.7,padding:"4px 0",display:"flex",gap:10}}>
+                  <span style={{color:"#27AE60",fontWeight:600,flexShrink:0}}>—</span>{a}
+                </li>
+              ))}
             </ul>
           </div>
+
           <div style={{background:"#FEF9EC",border:"1px solid rgba(201,168,76,0.2)",borderRadius:14,padding:"14px 18px",marginBottom:28,fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8B6914",lineHeight:1.6}}>
             Informations indicatives uniquement. Consultez un médecin pour tout symptôme persistant.
           </div>
+
           <button className="cta" style={{width:"100%",justifyContent:"center"}} onClick={reset}>
-            Nouvelle analyse <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Nouvelle analyse
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
           </button>
         </main>
       )}
 
+      {/* FOOTER */}
       <footer style={{borderTop:"1px solid rgba(91,168,229,0.15)",padding:"24px 28px"}}>
         <div style={{maxWidth:1100,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
           <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#B8C5D3"}}>© 2026 MediScan</span>
           <div style={{display:"flex",gap:20}}>
             {["Confidentialité","CGU","Mentions légales"].map(l => (
-              <a key={l} href={`/${l==="Confidentialité"?"confidentialite":l==="CGU"?"cgu":"mentions-legales"}`} style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#93A5B8",textDecoration:"none"}}>{l}</a>
+              <a key={l} href={`/${l === "Confidentialité" ? "confidentialite" : l === "CGU" ? "cgu" : "mentions-legales"}`} style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#93A5B8",textDecoration:"none"}}>{l}</a>
             ))}
           </div>
         </div>

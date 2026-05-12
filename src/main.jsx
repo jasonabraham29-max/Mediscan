@@ -7,11 +7,16 @@ import Auth from './pages/Auth.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import CGU from './pages/CGU.jsx'
 import MentionsLegales from './pages/MentionsLegales.jsx'
+import MediscanLuxe from './pages/MediscanLuxe.jsx'
+
+
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        
         <Route path="/" element={<App />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/confidentialite" element={<PrivacyPolicy />} />
