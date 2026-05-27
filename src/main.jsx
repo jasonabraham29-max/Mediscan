@@ -7,7 +7,7 @@ import Auth from './pages/Auth.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import CGU from './pages/CGU.jsx'
 import MentionsLegales from './pages/MentionsLegales.jsx'
-import MediscanLuxe from './pages/MediscanLuxe.jsx'
+
 
 
 
