@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "./lib/supabase";
 
 const SYMPTOMS = [
   "Fièvre", "Maux de tête", "Toux sèche", "Essoufflement",
@@ -14,7 +15,24 @@ export default function App() {
   const [age, setAge] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);const [user, setUser] = useState(null);
+
+useEffect(() => {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUser(session?.user ?? null);
+  });
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+  });
+  return () => subscription.unsubscribe();
+}, []);
+
+const handleLogout = async () => {
+  await supabase.auth.signOut();
+  setUser(null);
+};
+
+const getInitials = (email) => email ? email.substring(0, 2).toUpperCase() : "??";
 
   const toggle = (s) => setSelected(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
 
@@ -108,7 +126,37 @@ export default function App() {
             </div>
           </div>
           <button onClick={() => window.location.href="/auth"} style={{padding:"9px 22px",borderRadius:50,border:step===0?"1px solid rgba(255,255,255,0.2)":"1px solid rgba(27,111,191,0.2)",background:"transparent",color:step===0?"rgba(255,255,255,0.8)":"#1B6FBF",fontFamily:"'DM Sans',sans-serif",fontSize:13,fontWeight:500,cursor:"pointer",transition:"all 0.3s"}}>
-            Se connecter
+            {user ? (
+  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{
+      width: 34, height: 34, borderRadius: "50%",
+      background: "linear-gradient(135deg, #0A1628, #1B6FBF)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+      fontWeight: 700, color: "white",
+      border: "2px solid rgba(201,168,76,0.4)"
+    }}>
+      {getInitials(user.email)}
+    </div>
+    <span style={{
+      fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+      color: "#1B6FBF", fontWeight: 500,
+      maxWidth: 140, overflow: "hidden",
+      textOverflow: "ellipsis", whiteSpace: "nowrap"
+    }}>
+      {user.email}
+    </span>
+    <button className="ghost" style={{ padding: "8px 18px", fontSize: 12 }}
+      onClick={handleLogout}>
+      Déconnexion
+    </button>
+  </div>
+) : (
+  <button className="ghost" style={{ padding: "10px 22px", fontSize: 13 }}
+    onClick={() => window.location.href = "/auth"}>
+    Se connecter
+  </button>
+)}
           </button>
         </div>
       </header>
