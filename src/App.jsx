@@ -98,7 +98,18 @@ Règles strictes :
       const text = data.content?.[0]?.text || "";
       const clean = text.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
-      setResult(parsed);
+      setResult(parsed);if (user) {
+  await supabase.from("health_history").insert({
+    user_id: user.id,
+    symptoms_description: symptomsText,
+    urgence: parsed.urgence,
+    diagnostic: parsed.diagnostic,
+    medicaments: parsed.medicaments,
+    actions: parsed.actions,
+    consulter: parsed.consulter,
+    signes_alarme: parsed.signes_alarme,
+  });
+}
       setStep(3);
     } catch (err) {
       setError("Erreur lors de l'analyse. Vérifiez votre connexion et réessayez.");
